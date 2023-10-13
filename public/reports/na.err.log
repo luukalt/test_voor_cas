@@ -1,0 +1,95 @@
+Traceback (most recent call last):
+  File "/opt/hostedtoolcache/Python/3.8.18/x64/lib/python3.8/site-packages/jupyter_cache/executors/utils.py", line 58, in single_nb_execution
+    executenb(
+  File "/opt/hostedtoolcache/Python/3.8.18/x64/lib/python3.8/site-packages/nbclient/client.py", line 1305, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+  File "/opt/hostedtoolcache/Python/3.8.18/x64/lib/python3.8/site-packages/jupyter_core/utils/__init__.py", line 173, in wrapped
+    return loop.run_until_complete(inner)
+  File "/opt/hostedtoolcache/Python/3.8.18/x64/lib/python3.8/asyncio/base_events.py", line 616, in run_until_complete
+    return future.result()
+  File "/opt/hostedtoolcache/Python/3.8.18/x64/lib/python3.8/site-packages/nbclient/client.py", line 705, in async_execute
+    await self.async_execute_cell(
+  File "/opt/hostedtoolcache/Python/3.8.18/x64/lib/python3.8/site-packages/nbclient/client.py", line 1058, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/opt/hostedtoolcache/Python/3.8.18/x64/lib/python3.8/site-packages/nbclient/client.py", line 914, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+import numpy as np
+
+from bokeh.layouts import column, row
+from bokeh.models import CustomJS, Slider
+from bokeh.plotting import ColumnDataSource, figure, output_notebook, output_file, show
+
+x = np.linspace(0, 10, 500)
+y = np.sin(x)
+dimension1 = 400
+source = ColumnDataSource(data=dict(x=x, y=y))
+
+plot = figure(y_range=(-10, 10), plot_width=dimension1, plot_height=dimension1, toolbar_location="left")
+plot.toolbar.logo = None
+
+
+plot.line('x', 'y', source=source, line_width=3, line_alpha=0.6)
+
+
+amp_slider = Slider(start=0.1, end=10, value=1, step=.1, title="Amplitude")
+freq_slider = Slider(start=0.1, end=10, value=1, step=.1, title="Frequency")
+phase_slider = Slider(start=0, end=6.4, value=0, step=.1, title="Phase")
+offset_slider = Slider(start=-5, end=5, value=0, step=.1, title="Offset")
+
+callback = CustomJS(args=dict(source=source, amp=amp_slider, freq=freq_slider, phase=phase_slider, offset=offset_slider),
+                    code="""
+    const data = source.data;
+    const A = amp.value;
+    const k = freq.value;
+    const phi = phase.value;
+    const B = offset.value;
+    const x = data['x']
+    const y = data['y']
+    for (var i = 0; i < x.length; i++) {
+        y[i] = B + A*Math.sin(k*x[i]+phi);
+    }
+    source.change.emit();
+""")
+
+amp_slider.js_on_change('value', callback)
+freq_slider.js_on_change('value', callback)
+phase_slider.js_on_change('value', callback)
+offset_slider.js_on_change('value', callback)
+
+layout = row(
+    plot,
+    column(amp_slider, freq_slider, phase_slider, offset_slider),
+)
+plot.yaxis.axis_label = r"\[\sin(x)\]"
+plot.xaxis.axis_label = r"\[x\cdot\pi\]"
+output_notebook(hide_banner=True)
+
+show(layout)
+------------------
+
+
+[0;31m---------------------------------------------------------------------------[0m
+[0;31mAttributeError[0m                            Traceback (most recent call last)
+Cell [0;32mIn[1], line 12[0m
+[1;32m      9[0m dimension1 [38;5;241m=[39m [38;5;241m400[39m
+[1;32m     10[0m source [38;5;241m=[39m ColumnDataSource(data[38;5;241m=[39m[38;5;28mdict[39m(x[38;5;241m=[39mx, y[38;5;241m=[39my))
+[0;32m---> 12[0m plot [38;5;241m=[39m [43mfigure[49m[43m([49m[43my_range[49m[38;5;241;43m=[39;49m[43m([49m[38;5;241;43m-[39;49m[38;5;241;43m10[39;49m[43m,[49m[43m [49m[38;5;241;43m10[39;49m[43m)[49m[43m,[49m[43m [49m[43mplot_width[49m[38;5;241;43m=[39;49m[43mdimension1[49m[43m,[49m[43m [49m[43mplot_height[49m[38;5;241;43m=[39;49m[43mdimension1[49m[43m,[49m[43m [49m[43mtoolbar_location[49m[38;5;241;43m=[39;49m[38;5;124;43m"[39;49m[38;5;124;43mleft[39;49m[38;5;124;43m"[39;49m[43m)[49m
+[1;32m     13[0m plot[38;5;241m.[39mtoolbar[38;5;241m.[39mlogo [38;5;241m=[39m [38;5;28;01mNone[39;00m
+[1;32m     16[0m plot[38;5;241m.[39mline([38;5;124m'[39m[38;5;124mx[39m[38;5;124m'[39m, [38;5;124m'[39m[38;5;124my[39m[38;5;124m'[39m, source[38;5;241m=[39msource, line_width[38;5;241m=[39m[38;5;241m3[39m, line_alpha[38;5;241m=[39m[38;5;241m0.6[39m)
+
+File [0;32m/opt/hostedtoolcache/Python/3.8.18/x64/lib/python3.8/site-packages/bokeh/plotting/_figure.py:190[0m, in [0;36mfigure.__init__[0;34m(self, *arg, **kw)[0m
+[1;32m    188[0m [38;5;28;01mfor[39;00m name [38;5;129;01min[39;00m kw[38;5;241m.[39mkeys():
+[1;32m    189[0m     [38;5;28;01mif[39;00m name [38;5;129;01mnot[39;00m [38;5;129;01min[39;00m names:
+[0;32m--> 190[0m         [38;5;28;43mself[39;49m[38;5;241;43m.[39;49m[43m_raise_attribute_error_with_matches[49m[43m([49m[43mname[49m[43m,[49m[43m [49m[43mnames[49m[43m [49m[38;5;241;43m|[39;49m[43m [49m[43mopts[49m[38;5;241;43m.[39;49m[43mproperties[49m[43m([49m[43m)[49m[43m)[49m
+[1;32m    192[0m [38;5;28msuper[39m()[38;5;241m.[39m[38;5;21m__init__[39m([38;5;241m*[39marg, [38;5;241m*[39m[38;5;241m*[39mkw)
+[1;32m    194[0m [38;5;28mself[39m[38;5;241m.[39mx_range [38;5;241m=[39m get_range(opts[38;5;241m.[39mx_range)
+
+File [0;32m/opt/hostedtoolcache/Python/3.8.18/x64/lib/python3.8/site-packages/bokeh/core/has_props.py:368[0m, in [0;36mHasProps._raise_attribute_error_with_matches[0;34m(self, name, properties)[0m
+[1;32m    365[0m [38;5;28;01mif[39;00m [38;5;129;01mnot[39;00m matches:
+[1;32m    366[0m     matches, text [38;5;241m=[39m [38;5;28msorted[39m(properties), [38;5;124m"[39m[38;5;124mpossible[39m[38;5;124m"[39m
+[0;32m--> 368[0m [38;5;28;01mraise[39;00m [38;5;167;01mAttributeError[39;00m([38;5;124mf[39m[38;5;124m"[39m[38;5;124munexpected attribute [39m[38;5;132;01m{[39;00mname[38;5;132;01m!r}[39;00m[38;5;124m to [39m[38;5;132;01m{[39;00m[38;5;28mself[39m[38;5;241m.[39m[38;5;18m__class__[39m[38;5;241m.[39m[38;5;18m__name__[39m[38;5;132;01m}[39;00m[38;5;124m, [39m[38;5;132;01m{[39;00mtext[38;5;132;01m}[39;00m[38;5;124m attributes are [39m[38;5;132;01m{[39;00mnice_join(matches)[38;5;132;01m}[39;00m[38;5;124m"[39m)
+
+[0;31mAttributeError[0m: unexpected attribute 'plot_width' to figure, similar attributes are outer_width, width or min_width
+
